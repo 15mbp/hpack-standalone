@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,14 +75,14 @@ namespace hpack
 				return;
 			}
 
-			var current = 0L;
-			var n = 0;
+			long current = 0L;
+			int n = 0;
 
-			for (var i = 0; i < len; i++)
+			for (int i=0; i<len; i++)
 			{
-				var b = data[off + i] & 0xFF;
-				var code = (uint)this.codes[b];
-				var nbits = (int)lengths[b];
+				int b = data[off + i] & 0xFF;
+				uint code = (uint)this.codes[b];
+				int nbits = (int)lengths[b];
 
 				current <<= nbits;
 				current |= code;
@@ -111,14 +111,14 @@ namespace hpack
 		public int GetEncodedLength(byte[] data)
 		{
 			if (data == null)
-			{
 				throw new HPackNullReferenceException("data");
-			}
-			var len = 0L;
-			foreach (var b in data)
-			{
+
+			long len = 0L;
+
+			foreach (byte b in data)
+
 				len += lengths[b & 0xFF];
-			}
+
 			return (int)((len + 7) >> 3);
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

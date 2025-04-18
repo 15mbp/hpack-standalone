@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ namespace hpack
             var node = this.root;
             var current = 0;
             var bits = 0;
-            for (var i = 0; i < buf.Length; i++)
+            for (int i = 0; i < buf.Length; i++)
             {
                 var b = buf[i] & 0xFF;
                 current = (current << 8) | b;
@@ -163,7 +163,7 @@ namespace hpack
 		private static Node BuildTree(int[] codes, byte[] lengths)
 		{
 			var node = new Node();
-			for (var i = 0; i < codes.Length; i++)
+			for (int i = 0; i < codes.Length; i++)
 			{
 				Insert(node, i, codes[i], lengths[i]);
 			}
@@ -193,7 +193,7 @@ namespace hpack
 			var shift = 8 - length;
 			var start = (code << shift) & 0xFF;
 			var end = 1 << shift;
-			for (var i = start; i < start + end; i++)
+			for (int i = start; i < start + end; i++)
 			{
 				current.Children[i] = terminal;
 			}

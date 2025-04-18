@@ -7,7 +7,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ringostarr80_hpack&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ringostarr80_hpack)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ringostarr80_hpack&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ringostarr80_hpack)
 
-Header Compression for HTTP/2 written in C#
+Standalone implementation of HPACK for use with any protocol - not just HTTP/2
 
 ### An Example on how to use the hpack.Encoder and hpack.Decoder
 
@@ -85,6 +85,15 @@ namespace HTTP2
     }
   }
 }
+```
+
+To use standalone
+```c#
+StaticTable.UseStandaloneHPACK();
+
+StaticTable.Add("content-type", "text/html");
+StaticTable.Add("accept", "*/*);
+...
 ```
 
 Now you can encode and decode headers

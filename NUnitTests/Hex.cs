@@ -82,19 +82,19 @@ namespace hpack
 		 */
 		public static sbyte[] DecodeHex(char[] data)
 		{
-			var len = data.Length;
+			int len = data.Length;
 
 			if ((len & 0x01) != 0) {
 				throw new IOException("Odd number of characters.");
 			}
 
-			var output = new sbyte[len >> 1];
+			sbyte[] output = new sbyte[len >> 1];
 
 			// two characters form the hex value.
 			for(int i = 0, j = 0; j < len; i++) {
-				var f = Hex.ToDigit(data[j], j) << 4;
+				int f = Hex.ToDigit(data[j], j) << 4;
 				j++;
-				f = f | Hex.ToDigit(data[j], j);
+				f |= Hex.ToDigit(data[j], j);
 				j++;
 				output[i] = (sbyte)(f & 0xFF);
 			}
@@ -147,8 +147,8 @@ namespace hpack
 		 */
 		protected static char[] EncodeHex(byte[] data, char[] toDigits)
 		{
-			var l = data.Length;
-			var output = new char[l << 1];
+			int l = data.Length;
+			char[] output = new char[l << 1];
 			// two characters form the hex value.
 			for(int i = 0, j = 0; i < l; i++) {
 				output[j++] = toDigits[(0xF0 & data[i]) >> 4];
@@ -184,7 +184,7 @@ namespace hpack
 		 */
 		protected static int ToDigit(char ch, int index)
 		{
-			var digit = Convert.ToInt32(ch) - 48;
+			int digit = Convert.ToInt32(ch) - 48;
 			if (digit >= 17 && digit <= 22) {
 				digit -= 7;
 			}

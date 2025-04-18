@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,29 +91,30 @@ namespace hpack
 		/// <returns>int</returns>
 		public int CompareTo(HeaderField anotherHeaderField)
 		{
-			var ret = CompareTo(this.name, anotherHeaderField.name);
+			int ret = CompareTo(this.name, anotherHeaderField.name);
+
 			if (ret == 0)
-			{
 				ret = CompareTo(this.value, anotherHeaderField.value);
-			}
+
 			return ret;
 		}
 
 		private static int CompareTo(byte[] s1, byte[] s2)
 		{
-			var len1 = s1.Length;
-			var len2 = s2.Length;
-			var lim = Math.Min(len1, len2);
+			int len1 = s1.Length;
+			int len2 = s2.Length;
+			int lim = Math.Min(len1, len2);
 
-			var k = 0;
+			int k = 0;
+
 			while (k < lim)
 			{
-				var b1 = s1[k];
-				var b2 = s2[k];
+				byte b1 = s1[k];
+				byte b2 = s2[k];
+
 				if (b1 != b2)
-				{
 					return b1 - b2;
-				}
+
 				k++;
 			}
 			return len1 - len2;
@@ -129,11 +130,11 @@ namespace hpack
 			if (obj is HeaderField other)
 			{
 				if (other == this)
-				{
 					return true;
-				}
-				var nameEquals = HpackUtil.Equals(this.name, other.name);
-				var valueEquals = HpackUtil.Equals(this.value, other.value);
+
+				bool nameEquals = HpackUtil.Equals(this.name, other.name);
+				bool valueEquals = HpackUtil.Equals(this.value, other.value);
+
 				return nameEquals && valueEquals;
 			}
 

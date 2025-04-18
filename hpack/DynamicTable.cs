@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,15 +57,15 @@ namespace hpack
 		/// </summary>
 		public int Length()
 		{
-			var length = 0;
+			int length = 0;
+
 			if (this.head < this.tail)
-			{
 				length = this.headerFields.Length - this.tail + this.head;
-			}
+
 			else
-			{
+
 				length = this.head - this.tail;
-			}
+
 			return length;
 		}
 
@@ -98,18 +98,15 @@ namespace hpack
 		public HeaderField GetEntry(int index)
 		{
 			if (index <= 0 || index > this.Length())
-			{
 				throw new HPackIndexOutOfRangeException();
-			}
-			var i = this.head - index;
+
+			int i = this.head - index;
+
 			if (i < 0)
-			{
 				return this.headerFields[i + this.headerFields.Length];
-			}
+
 			else
-			{
 				return this.headerFields[i];
-			}
 		}
 
 		/// <summary>
@@ -122,22 +119,22 @@ namespace hpack
 		/// <param name="header">Header.</param>
 		public void Add(HeaderField header)
 		{
-			var headerSize = header.Size;
+			int headerSize = header.Size;
+
 			if (headerSize > this.capacity)
 			{
 				this.Clear();
 				return;
 			}
+
 			while (this.size + headerSize > this.capacity)
-			{
 				this.Remove();
-			}
+
 			this.headerFields[this.head++] = header;
 			this.size += header.Size;
+
 			if (this.head == this.headerFields.Length)
-			{
 				this.head = 0;
-			}
 		}
 
 		/// <summary>
@@ -145,17 +142,17 @@ namespace hpack
 		/// </summary>
 		public HeaderField Remove()
 		{
-			var removed = this.headerFields[this.tail];
+			HeaderField removed = this.headerFields[this.tail];
+
 			if (removed == null)
-			{
 				return null;
-			}
+
 			this.size -= removed.Size;
 			this.headerFields[this.tail++] = null;
+
 			if (this.tail == this.headerFields.Length)
-			{
 				this.tail = 0;
-			}
+
 			return removed;
 		}
 
@@ -167,10 +164,9 @@ namespace hpack
 			while (this.tail != this.head)
 			{
 				this.headerFields[this.tail++] = null;
+
 				if (this.tail == this.headerFields.Length)
-				{
 					this.tail = 0;
-				}
 			}
 			this.head = 0;
 			this.tail = 0;
@@ -186,55 +182,46 @@ namespace hpack
 		public void SetCapacity(int capacity)
 		{
 			if (capacity < 0)
-			{
 				throw new ArgumentException("Illegal Capacity: " + capacity);
-			}
 
 			// initially capacity will be -1 so init won't return here
 			if (this.capacity == capacity)
-			{
 				return;
-			}
+
 			this.capacity = capacity;
 
 			if (capacity == 0)
-			{
 				this.Clear();
-			}
+
 			else
 			{
 				// initially size will be 0 so remove won't be called
 				while (this.size > capacity)
-				{
 					this.Remove();
-				}
 			}
 
-			var maxEntries = capacity / HeaderField.HEADER_ENTRY_OVERHEAD;
+			int maxEntries = capacity / HeaderField.HEADER_ENTRY_OVERHEAD;
+
 			if (capacity % HeaderField.HEADER_ENTRY_OVERHEAD != 0)
-			{
 				maxEntries++;
-			}
 
 			// check if capacity change requires us to reallocate the array
 			if (this.headerFields != null && this.headerFields.Length == maxEntries)
-			{
 				return;
-			}
 
-			var tmp = new HeaderField[maxEntries];
+			HeaderField[] tmp = new HeaderField[maxEntries];
 
 			// initially length will be 0 so there will be no copy
-			var len = this.Length();
-			var cursor = this.tail;
-			for (var i = 0; i < len; i++)
+			int len = this.Length();
+			int cursor = this.tail;
+
+			for (int i=0; i<len; i++)
 			{
-				var entry = this.headerFields[cursor++];
+				HeaderField entry = this.headerFields[cursor++];
 				tmp[i] = entry;
+
 				if (cursor == this.headerFields.Length)
-				{
 					cursor = 0;
-				}
 			}
 
 			this.tail = 0;

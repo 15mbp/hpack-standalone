@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+
+/*
+	Add, Remove, Clear methods
+	Preserve compatibility with HTTP/2
+*/
 
 namespace hpack
 {
@@ -29,7 +37,7 @@ namespace hpack
 		/// Appendix A: Static Table
 		/// </summary>
 		/// <note type="rfc">http://tools.ietf.org/html/rfc7541#appendix-A</note>
-		private static List<HeaderField> STATIC_TABLE = new List<HeaderField>() {
+		private static List<HeaderField> STATIC_TABLE = [
 			/*  1 */new HeaderField(":authority", string.Empty),
 			/*  2 */new HeaderField(":method", "GET"),
 			/*  3 */new HeaderField(":method", "POST"),
@@ -91,15 +99,36 @@ namespace hpack
 			/* 59 */new HeaderField("vary", string.Empty),
 			/* 60 */new HeaderField("via", string.Empty),
 			/* 61 */new HeaderField("www-authenticate", string.Empty)
-		};
+		];
 
 		private static Dictionary<string, int> STATIC_INDEX_BY_NAME = CreateMap();
+		
+		private static bool IsWriteProtected = false;
+		private static bool IsUsedByHTTP2 = true;
 
 		/// <summary>
 		/// The number of header fields in the static table.
 		/// </summary>
 		/// <value>The length.</value>
 		public static int Length { get { return STATIC_TABLE.Count; } }
+
+		/// <summary>
+		/// Empties StaticTable for use outside of HTTP/2.
+		/// </summary>
+		public static void UseStandaloneHPACK()
+		{
+			STATIC_TABLE.Clear();
+			IsUsedByHTTP2 = false;
+			STATIC_INDEX_BY_NAME = CreateMap();
+		}
+
+		/// <summary>
+		/// Prevents modifying StaticTable once in use.
+		/// </summary>
+		public static void EnableWriteProtection()
+		{
+			IsWriteProtected = true;
+		}
 
 		/// <summary>
 		/// Return the header field at the given index value.
@@ -119,12 +148,12 @@ namespace hpack
 		/// <param name="name">Name.</param>
 		public static int GetIndex(byte[] name)
 		{
-			var nameString = Encoding.UTF8.GetString(name);
-			if (!STATIC_INDEX_BY_NAME.ContainsKey(nameString))
-			{
+			string nameString = Encoding.UTF8.GetString(name);
+
+			if (!STATIC_INDEX_BY_NAME.TryGetValue(nameString, out int value))
 				return -1;
-			}
-			return STATIC_INDEX_BY_NAME[nameString];
+
+			return value;
 		}
 
 		/// <summary>
@@ -136,24 +165,22 @@ namespace hpack
 		/// <param name="value">Value.</param>
 		public static int GetIndex(byte[] name, byte[] value)
 		{
-			var index = GetIndex(name);
+			int index = GetIndex(name);
+
 			if (index == -1)
-			{
 				return -1;
-			}
 
 			// Note this assumes all entries for a given header field are sequential.
 			while (index <= StaticTable.Length)
 			{
-				var entry = GetEntry(index);
+				HeaderField entry = GetEntry(index);
+
 				if (!HpackUtil.Equals(name, entry.Name))
-				{
 					break;
-				}
+
 				if (HpackUtil.Equals(value, entry.Value))
-				{
 					return index;
-				}
+
 				index++;
 			}
 
@@ -166,18 +193,87 @@ namespace hpack
 		/// <returns>The map.</returns>
 		private static Dictionary<string, int> CreateMap()
 		{
-			var length = STATIC_TABLE.Count;
-			var ret = new Dictionary<string, int>(length);
+			int length = STATIC_TABLE.Count;
+			Dictionary<string, int> ret = new(length);
 
 			// Iterate through the static table in reverse order to
 			// save the smallest index for a given name in the map.
-			for (var index = length; index > 0; index--)
+			for (int index=length; index>0; index--)
 			{
-				var entry = GetEntry(index);
-				var name = Encoding.UTF8.GetString(entry.Name);
+				HeaderField entry = GetEntry(index);
+				string name = Encoding.UTF8.GetString(entry.Name);
 				ret[name] = index;
 			}
+
 			return ret;
+		}
+
+		public static void Add(string name, string value)
+		{
+			if (IsUsedByHTTP2)
+				throw new InvalidOperationException(
+					"Illegal operation: Static table in use by HTTP/2."
+				);
+			
+			if (IsWriteProtected)
+				throw new InvalidOperationException(
+					"Illegal operation: Encoder/Decoder already initialised."
+				);
+
+			STATIC_TABLE.Add(new HeaderField(name, value));
+			STATIC_INDEX_BY_NAME = CreateMap();
+		}
+
+		public static void Remove(byte[] name, byte[] value)
+		{
+			int index = GetIndex(name, value);
+
+			if (index == -1)
+				throw new IndexOutOfRangeException("Header field not found.");
+
+			Remove(index);
+		}
+
+		public static void Remove(byte[] name)
+		{
+			int index = GetIndex(name);
+
+			if (index == -1)
+				throw new IndexOutOfRangeException("Header field not found.");
+
+			Remove(index);
+		}
+
+		public static void Remove(int index)
+		{
+			if (IsUsedByHTTP2)
+				throw new InvalidOperationException(
+					"Illegal operation: Static table in use by HTTP/2."
+				);
+			
+			if (IsWriteProtected)
+				throw new InvalidOperationException(
+					"Illegal operation: Encoder/Decoder already initialised."
+				);
+
+			STATIC_TABLE.RemoveAt(index);
+			STATIC_INDEX_BY_NAME = CreateMap();
+		}
+
+		public static void Clear()
+		{
+			if (IsUsedByHTTP2)
+				throw new InvalidOperationException(
+					"Illegal operation: Static table in use by HTTP/2."
+				);
+			
+			if (IsWriteProtected)
+				throw new InvalidOperationException(
+					"Illegal operation: Encoder/Decoder already initialised."
+				);
+
+			STATIC_TABLE.Clear();
+			STATIC_INDEX_BY_NAME = CreateMap();
 		}
 	}
 }

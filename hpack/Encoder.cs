@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ namespace hpack
 			this.forceHuffmanOff = forceHuffmanOff;
 			this.capacity = maxHeaderTableSize;
 			this.head.Before = this.head.After = this.head;
+
+			StaticTable.EnableWriteProtection();
 		}
 
 		/// <summary>
@@ -387,7 +389,7 @@ namespace hpack
 			}
 			var h = Encoder.Hash(name);
 			var i = Encoder.Index(h);
-			for (var e = headerFields[i]; e != null; e = e.Next)
+			for (HeaderEntry e = headerFields[i]; e != null; e = e.Next)
 			{
 				if (e.Hash == h && HpackUtil.Equals(name, e.Name) && HpackUtil.Equals(value, e.Value))
 				{
@@ -406,13 +408,13 @@ namespace hpack
 		private int GetIndex(byte[] name)
 		{
 			if (this.Length() == 0 || name == null)
-			{
 				return -1;
-			}
+
 			var h = Encoder.Hash(name);
 			var i = Encoder.Index(h);
 			var index = -1;
-			for (var e = headerFields[i]; e != null; e = e.Next)
+
+			for (HeaderEntry e = headerFields[i]; e != null; e = e.Next)
 			{
 				if (e.Hash == h && HpackUtil.Equals(name, e.Name))
 				{
@@ -517,7 +519,7 @@ namespace hpack
 		/// </summary>
 		private void Clear()
 		{
-			for (var i = 0; i < this.headerFields.Length; i++)
+			for (int i = 0; i < this.headerFields.Length; i++)
 			{
 				this.headerFields[i] = null;
 			}
@@ -533,7 +535,7 @@ namespace hpack
 		private static int Hash(byte[] name)
 		{
 			var h = 0;
-			for (var i = 0; i < name.Length; i++)
+			for (int i = 0; i < name.Length; i++)
 			{
 				h = 31 * h + name[i];
 			}

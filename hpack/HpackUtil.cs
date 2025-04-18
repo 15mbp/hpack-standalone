@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,13 @@ namespace hpack
 		public static bool Equals(byte[] s1, byte[] s2)
 		{
 			if (s1.Length != s2.Length)
-			{
 				return false;
-			}
-			var c = 0;
-			for (var i = 0; i < s1.Length; i++)
-			{
+
+			int c = 0;
+
+			for (int i = 0; i < s1.Length; i++)
 				c |= (s1[i] ^ s2[i]);
-			}
+
 			return c == 0;
 		}
 

@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-Please open an [issue](https://github.com/ringostarr80/hpack/issues) or commit a [pull request](https://github.com/ringostarr80/hpack/pulls) for reporting a Vulnerability.
+Please open an [issue](https://github.com/15mbp/hpack/issues) or commit a [pull request](https://github.com/15mbp/hpack/pulls) for reporting a Vulnerability.

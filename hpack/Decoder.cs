@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright 2014 Twitter, Inc
- * This file is a derivative work modified by Ringo Leese
+ * This file is a derivative work modified by 15mbp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,8 @@ namespace hpack
 			this.maxDynamicTableSize = maxHeaderTableSize;
 			this.encoderMaxDynamicTableSize = maxHeaderTableSize;
 			this.maxDynamicTableSizeChangeRequired = false;
+
+			StaticTable.EnableWriteProtection();
 			this.Reset();
 		}
 
@@ -129,7 +131,7 @@ namespace hpack
 		{
 			while (input.BaseStream.Length - input.BaseStream.Position > 0)
 			{
-				var cont = this.state switch {
+				bool cont = this.state switch {
 					State.READ_HEADER_REPRESENTATION => this.DecodeStateReadHeaderRepresentation(input, headerListener),
 					State.READ_MAX_DYNAMIC_TABLE_SIZE => this.DecodeStateReadMaxDynamicTableSize(input),
 					State.READ_INDEXED_HEADER => this.DecodeStateReadIndexedHeader(input, headerListener),
@@ -152,7 +154,8 @@ namespace hpack
 
 		private bool DecodeStateReadHeaderRepresentation(BinaryReader input, IHeaderListener headerListener)
 		{
-			var b = input.ReadSByte();
+			sbyte b = input.ReadSByte();
+
 			if (maxDynamicTableSizeChangeRequired && (b & 0xE0) != 0x20)
 			{
 				// Encoder MUST signal maximum dynamic table size change

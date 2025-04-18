@@ -1,5 +1,5 @@
-HPACK - Header Compression for HTTP/2
-Copyright 2015 Ringo Leese
+Standalone implementation of HPACK for use with any protocol - not just HTTP/2
+Copyright 2025 15mbp
 
-This product was converted from the Java code at
-https://github.com/twitter/hpack/ to the current C# code.
+This product was converted from the C# code at
+https://github.com/ringostarr80/hpack/ to the current C# code.
