@@ -92,7 +92,7 @@ To use standalone
 StaticTable.UseStandaloneHPACK();
 
 StaticTable.Add("content-type", "text/html");
-StaticTable.Add("accept", "*/*);
+StaticTable.Add("accept", "*/*");
 ...
 ```
 
